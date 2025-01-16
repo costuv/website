@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Costuv</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="auth.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged, 
+            signOut,
+            updatePassword,
+            EmailAuthProvider,
+            reauthenticateWithCredential
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDmioQV6hHN-8HflggR0Mu5fqIDdUmQySc",
+            authDomain: "authforcostuv.firebaseapp.com",
+            projectId: "authforcostuv",
+            storageBucket: "authforcostuv.firebasestorage.app",
+            messagingSenderId: "377159945543",
+            appId: "1:377159945543:web:380144eb6f5eb90de61062"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        let loginTime = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, (user) => {
+                if (!user) {
+                    // Redirect immediately if no user is logged in
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Set login time when user is authenticated
+                if (!loginTime) {
+                    loginTime = new Date();
+                }
+
+                // Only execute UI updates if user is logged in
+                const userPanel = document.getElementById('userPanel');
+                const userName = document.getElementById('userName');
+                const userEmail = document.getElementById('userEmail');
+                const welcomeMessage = document.querySelector('.hero-content h1');
+                
+                userPanel.style.display = 'block';
+                userName.textContent = user.displayName || 'User';
+                userEmail.textContent = user.email;
+                welcomeMessage.textContent = `Welcome ${user.displayName || 'User'}`;
+            });
+        });
+
+        // Make logout function globally available
+        window.logout = () => {
+            signOut(auth).then(() => {
+                window.location.href = 'login.html';
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        };
+
+        window.toggleUserMenu = () => {
+            const userMenu = document.getElementById('userMenu');
+            userMenu.classList.toggle('active');
+        };
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const messageElement = document.getElementById('notification-message');
+            
+            notification.className = 'notification ' + type;
+            messageElement.textContent = message;
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        window.showProfile = () => {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const profileModal = document.getElementById('profileModal');
+            document.getElementById('profileName').textContent = user.displayName || 'User';
+            document.getElementById('profileEmail').textContent = user.email;
+
+            // Calculate and display session time
+            const now = new Date();
+            const duration = now - loginTime;
+            const minutes = Math.floor(duration / 60000);
+            const seconds = Math.floor((duration % 60000) / 1000);
+            document.getElementById('sessionTime').textContent = 
+                `${minutes}m ${seconds}s`;
+
+            // Update session time every second
+            if (window.sessionInterval) clearInterval(window.sessionInterval);
+            window.sessionInterval = setInterval(() => {
+                const now = new Date();
+                const duration = now - loginTime;
+                const minutes = Math.floor(duration / 60000);
+                const seconds = Math.floor((duration % 60000) / 1000);
+                document.getElementById('sessionTime').textContent = 
+                    `${minutes}m ${seconds}s`;
+            }, 1000);
+
+            profileModal.style.display = 'block';
+        };
+
+        window.closeProfileModal = () => {
+            document.getElementById('profileModal').style.display = 'none';
+            if (window.sessionInterval) clearInterval(window.sessionInterval);
+        };
+
+        // Close modal when clicking outside
+        window.onclick = (event) => {
+            const modal = document.getElementById('profileModal');
+            if (event.target === modal) {
+                closeProfileModal();
+            }
+        };
+
+        window.togglePasswordReset = () => {
+            const section = document.getElementById('passwordResetSection');
+            section.classList.toggle('show');
+        };
+
+        window.resetPassword = async () => {
+            const user = auth.currentUser;
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showNotification('Please fill in all password fields', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showNotification('New passwords do not match!', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showNotification('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            try {
+                // Create credential with current password
+                const credential = EmailAuthProvider.credential(
+                    user.email,
+                    currentPassword
+                );
+
+                // Attempt to reauthenticate before updating password
+                try {
+                    await reauthenticateWithCredential(user, credential);
+                } catch (error) {
+                    if (error.code === 'auth/wrong-password') {
+                        showNotification('Current password is incorrect', 'error');
+                        return;
+                    }
+                    throw error; // Pass other errors to main error handler
+                }
+
+                // If reauthentication successful, update password
+                await updatePassword(user, newPassword);
+                showNotification('Password updated successfully!', 'success');
+                
+                // Clear fields and hide section
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+                document.getElementById('passwordResetSection').classList.remove('show');
+            } catch (error) {
+                showNotification(
+                    error.code === 'auth/requires-recent-login' 
+                        ? 'Please log out and log in again to change your password' 
+                        : error.message,
+                    'error'
+                );
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">COSTUV</div>
+        <div class="nav-controls">
+            <button class="nav-button" onclick="toggleSearch()">
+                <i class="fas fa-search"></i>
+            </button>
+            <button class="nav-button menu-toggle" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <div class="search-container" id="searchContainer">
+            <input type="text" id="searchInput" placeholder="Search games...">
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="#home">Home</a>
+            <a href="#games">Games</a>
+            <div class="user-panel" id="userPanel">
+                <button class="user-button" onclick="toggleUserMenu()">
+                    <span id="userName"></span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="user-menu" id="userMenu">
+                    <div id="userEmail" class="user-email"></div>
+                    <a href="#" onclick="showProfile()">Profile</a>
+                    <a href="#" onclick="logout()">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div id="notification" class="notification">
+        <i class="fas fa-info-circle"></i>
+        <span id="notification-message"></span>
+    </div>
+
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeProfileModal()">&times;</span>
+            <h2>User Profile</h2>
+            <div class="profile-info">
+                <p><strong>Username:</strong> <span id="profileName"></span></p>
+                <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+                <p><strong>Session Duration:</strong> <span id="sessionTime"></span></p>
+                <button onclick="togglePasswordReset()" class="toggle-reset-btn">
+                    <i class="fas fa-key"></i> Reset Password
+                </button>
+                <div id="passwordResetSection" class="password-reset-section">
+                    <input type="password" id="currentPassword" placeholder="Current Password" class="form-input">
+                    <input type="password" id="newPassword" placeholder="New Password" class="form-input">
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password" class="form-input">
+                    <button onclick="resetPassword()" class="reset-btn">Update Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Welcome</h1>
+            <p>For all time. Always</p>
+        </div>
+    </section>
+
+    <section id="games" class="games-grid">
+        <div class="game-card">
+            <img src="adventurequest.jpg" alt="Adventure Quest">
+            <h3>Adventure Quest</h3>
+            <p>An epic RPG adventure</p>
+            <p class="version">Version: 1.0.2</p>
+            <a href="#" class="download-btn" onclick="downloadGame('Adventure Quest')">Download</a>
+        </div>
+        <div class="game-card">
+            <img src="spacewarriors.jpg" alt="Space Warriors">
+            <h3>Space Warriors</h3>
+            <p>Sci-fi shooter</p>
+            <p class="version">Version: 2.1.0</p>
+            <a href="#" class="download-btn" onclick="downloadGame('Space Warriors')">Download</a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="social-links">
+            <a href="https://instagram.com/costuvdhungel" target="_blank" class="instagram">
+                <i class="fab fa-instagram"></i>
+                <span>Instagram</span>
+            </a>
+            <a href="https://youtube.com/@kaustuvdhungel" target="_blank" class="youtube">
+                <i class="fab fa-youtube"></i>
+                <span>YouTube</span>
+            </a>
+            <a href="https://github.com/costuv" target="_blank" class="github">
+                <i class="fab fa-github"></i>
+                <span>GitHub</span>
+            </a>
+            <a href="https://discord.gg/h6VcdseZMw" target="_blank" class="discord">
+                <i class="fab fa-discord"></i>
+                <span>Discord</span>
+            </a>
+        </div>
+        <p class="footer-text">&copy; 2025 COSTUV Games. All rights reserved.</p>
+    </footer>
+
+    <script type="module" src="script.js"></script>
+    <script>
+        function toggleMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
+        }
+        
+        function toggleSearch() {
+            const searchContainer = document.getElementById('searchContainer');
+            const searchIcon = document.querySelector('.nav-button .fa-search');
+            searchContainer.classList.toggle('active');
+            
+            // Update search icon to indicate state
+            if (searchContainer.classList.contains('active')) {
+                searchIcon.style.color = '#4ecdc4';
+            } else {
+                searchIcon.style.color = 'white';
+            }
+        }
+
+        // Close search when clicking outside
+        document.addEventListener('click', (e) => {
+            const searchContainer = document.getElementById('searchContainer');
+            const searchButton = document.querySelector('.nav-button');
+            const searchIcon = document.querySelector('.nav-button .fa-search');
+            
+            if (!searchContainer.contains(e.target) && e.target !== searchButton && !searchButton.contains(e.target)) {
+                searchContainer.classList.remove('active');
+                searchIcon.style.color = 'white';
+            }
+        });
+    </script>
+</body>
+</html>
