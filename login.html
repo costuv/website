@@ -30,8 +30,39 @@
                 <input type="password" id="password" required placeholder="Password">
             </div>
             <button type="submit" class="auth-btn">Login</button>
-            <p>Don't have an account? Contact <a href="mailto:support@costuv.tech">here</a></p>
+            <p>Don't have an account? <a href="#" onclick="showContactModal()">Contact us</a></p>
         </form>
+    </div>
+<!--test -->
+    <!-- Add contact modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content contact">
+            <span class="close-btn" onclick="closeContactModal()">&times;</span>
+            <h2>Contact Us</h2>
+            <form id="contactForm" class="contact-form">
+                <div class="form-group">
+                    <input type="text" id="contactName" required placeholder="Your Name">
+                </div>
+                <div class="form-group">
+                    <input type="email" id="contactEmail" required placeholder="Your Email">
+                </div>
+                <div class="form-group">
+                    <textarea id="contactMessage" required placeholder="Your Message" rows="4"></textarea>
+                </div>
+                <div class="contact-options">
+                    <button type="submit" class="auth-btn">Send Message</button>
+                    <div class="alternative-contact">
+                        <p>Or contact us directly:</p>
+                        <a href="mailto:support@costuv.tech" class="contact-link">
+                            <i class="fas fa-envelope"></i> support@costuv.tech
+                        </a>
+                        <a href="https://discord.gg/h6VcdseZMw" target="_blank" class="contact-link">
+                            <i class="fab fa-discord"></i> Join our Discord
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script type="module">
@@ -94,6 +125,40 @@
             } catch (error) {
                 showNotification(error.message, 'error');
             }
+        });
+
+        // Add these functions
+        window.showContactModal = () => {
+            document.getElementById('contactModal').style.display = 'block';
+        };
+
+        window.closeContactModal = () => {
+            document.getElementById('contactModal').style.display = 'none';
+        };
+
+        // Close modal when clicking outside
+        window.onclick = (event) => {
+            const modal = document.getElementById('contactModal');
+            if (event.target === modal) {
+                closeContactModal();
+            }
+        };
+
+        // Handle contact form submission
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('contactName').value;
+            const email = document.getElementById('contactEmail').value;
+            const message = document.getElementById('contactMessage').value;
+
+            // You can implement your preferred contact method here
+            // For now, we'll open the default email client as fallback
+            const mailtoLink = `mailto:support@costuv.tech?subject=Contact from ${name}&body=${message}%0D%0A%0D%0AFrom: ${email}`;
+            window.location.href = mailtoLink;
+            
+            // Clear form and close modal
+            e.target.reset();
+            closeContactModal();
         });
     </script>
 </body>
