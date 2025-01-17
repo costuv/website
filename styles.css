@@ -589,23 +589,26 @@ html {
     background: linear-gradient(45deg, #45b7af, #4ecdc4);
 }
 
+/* ...existing code... */
 .logo {
     font-size: 1.8rem;
     font-weight: bold;
-    background: linear-gradient(45deg, #3498db, #2980b9);
+    background: linear-gradient(45deg, #ffffff, #e6e6e6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    color: white;
 }
 
 .hero h1 {
     font-size: 3.5rem;
-    background: linear-gradient(45deg, #3498db, #2980b9);
+    background: linear-gradient(45deg, #ffffff, #e6e6e6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     margin-bottom: 1rem;
 }
+/* ...existing code... */
 
 .hero p {
     font-size: 1.2rem;
@@ -979,6 +982,21 @@ html {
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px); /* Apply blur to modal content instead */
+    /* Center the modal */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* For both profile and contact modals */
+.modal-content.contact,
+#profileModal .modal-content {
+    margin: 0;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .close-btn {
@@ -1538,3 +1556,11 @@ html {
     }
 }
 /* ...existing code... */
+
+.hero-content h1 {
+    color: white;
+}
+
+.hero-content p {
+    color: white;
+}

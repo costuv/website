@@ -1,6 +1,7 @@
 const games = [
     { name: 'Wood Man', version: '0.0.1', description: 'An epic RPG adventure' },
-    { name: 'Space Shooter', version: '0.0.1', description: 'Space shooting' }
+    { name: 'Space Shooter', version: '0.0.1', description: 'Space shooting' },
+    { name: 'Dust Racing', version: '0.0.1', description: 'A thrilling racing game' }
 ];
 
 function searchGames() {
