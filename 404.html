@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - JavaScript Required | COSTUV</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .error-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('hero-bg.jpg');
+            background-size: cover;
+        }
+
+        .error-content {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .error-code {
+            font-size: 6rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00C9FF, #92FE9D);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+
+        .error-details {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: linear-gradient(45deg, #4ecdc4, #45b7af);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-content">
+            <div class="error-code">404</div>
+            <h1 class="error-message">JavaScript is Required</h1>
+            <p class="error-details">
+                This website requires JavaScript to function properly. Please enable JavaScript in your browser settings and refresh the page.
+            </p>
+            <a href="index.html" class="back-btn">Refresh Page</a>
+        </div>
+    </div>
+</body>
+</html>

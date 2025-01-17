@@ -55,6 +55,8 @@
                 userEmail.textContent = user.email;
                 welcomeMessage.textContent = `Welcome ${user.displayName || 'User'}`;
             });
+
+            setupModalHandlers();
         });
 
         // Make logout function globally available
@@ -114,18 +116,37 @@
             profileModal.style.display = 'block';
         };
 
-        window.closeProfileModal = () => {
-            document.getElementById('profileModal').style.display = 'none';
-            if (window.sessionInterval) clearInterval(window.sessionInterval);
-        };
-
-        // Close modal when clicking outside
-        window.onclick = (event) => {
+        // Update closeProfileModal to be available globally
+        function closeModal() {
             const modal = document.getElementById('profileModal');
-            if (event.target === modal) {
-                closeProfileModal();
+            modal.style.display = 'none';
+            if (window.sessionInterval) {
+                clearInterval(window.sessionInterval);
             }
-        };
+        }
+
+        function setupModalHandlers() {
+            const modal = document.getElementById('profileModal');
+            const closeBtn = document.querySelector('.close-btn');
+            
+            // Clear any existing event listeners
+            closeBtn.onclick = () => {
+                modal.style.display = 'none';
+                if (window.sessionInterval) {
+                    clearInterval(window.sessionInterval);
+                }
+            };
+
+            // Click outside to close
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                    if (window.sessionInterval) {
+                        clearInterval(window.sessionInterval);
+                    }
+                }
+            };
+        }
 
         window.togglePasswordReset = () => {
             const section = document.getElementById('passwordResetSection');
@@ -189,8 +210,28 @@
                 );
             }
         };
+
+        // Add this after other event listeners
+        document.getElementById('closeProfileBtn').addEventListener('click', () => {
+            document.getElementById('profileModal').style.display = 'none';
+            if (window.sessionInterval) {
+                clearInterval(window.sessionInterval);
+            }
+        });
+
+        // Add this global function for the close button
+        window.closeModal = () => {
+            const profileModal = document.getElementById('profileModal');
+            profileModal.style.display = 'none';
+            if (window.sessionInterval) {
+                clearInterval(window.sessionInterval);
+            }
+        };
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <noscript>
+        <meta http-equiv="refresh" content="0; url=404.html">
+    </noscript>
 </head>
 <body>
     <nav>
@@ -198,6 +239,9 @@
         <div class="nav-controls">
             <button class="nav-button" onclick="toggleSearch()">
                 <i class="fas fa-search"></i>
+            </button>
+            <button class="nav-button mobile-profile" onclick="showProfile()">
+                <i class="fas fa-user"></i>
             </button>
             <button class="nav-button menu-toggle" onclick="toggleMenu()">
                 <i class="fas fa-bars"></i>
@@ -210,14 +254,17 @@
             <a href="#home">Home</a>
             <a href="#games">Games</a>
             <div class="user-panel" id="userPanel">
-                <button class="user-button" onclick="toggleUserMenu()">
-                    <span id="userName"></span>
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-                <div class="user-menu" id="userMenu">
-                    <div id="userEmail" class="user-email"></div>
-                    <a href="#" onclick="showProfile()">Profile</a>
-                    <a href="#" onclick="logout()">Logout</a>
+                <!-- Remove profile button, only keep the dropdown -->
+                <div class="user-dropdown">
+                    <button class="user-button" onclick="toggleUserMenu()">
+                        <span id="userName" class="smesh"></span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="user-menu" id="userMenu">
+                        <div id="userEmail" class="user-email"></div>
+                        <a href="#" onclick="showProfile()">Profile</a>
+                        <a href="#" onclick="logout()">Logout</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -229,46 +276,84 @@
 
     <div id="profileModal" class="modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeProfileModal()">&times;</span>
+            <button class="close-btn" id="closeProfileBtn" onclick="closeModal()" aria-label="Close profile">
+                <span>×</span>
+            </button>
             <h2>User Profile</h2>
             <div class="profile-info">
                 <p><strong>Username:</strong> <span id="profileName"></span></p>
                 <p><strong>Email:</strong> <span id="profileEmail"></span></p>
                 <p><strong>Session Duration:</strong> <span id="sessionTime"></span></p>
                 <button onclick="togglePasswordReset()" class="toggle-reset-btn">
-                    <i class="fas fa-key"></i> Reset Password
+                    <i class="fas fa-key"></i> <span class="smesh">Reset Password</span>
                 </button>
                 <div id="passwordResetSection" class="password-reset-section">
                     <input type="password" id="currentPassword" placeholder="Current Password" class="form-input">
                     <input type="password" id="newPassword" placeholder="New Password" class="form-input">
                     <input type="password" id="confirmPassword" placeholder="Confirm Password" class="form-input">
-                    <button onclick="resetPassword()" class="reset-btn">Update Password</button>
+                    <button onclick="resetPassword()" class="reset-btn smesh">Update Password</button>
                 </div>
+                <button onclick="logout()" class="mobile-logout-btn smesh">
+                    <i class="fas fa-sign-out-alt"></i> Log Out
+                </button>
             </div>
         </div>
     </div>
 
     <section id="home" class="hero">
         <div class="hero-content">
-            <h1>Welcome</h1>
-            <p>For all time. Always</p>
+            <div class="welcome-text">
+                <h1>Welcome <span id="userNameDisplay"></span></h1>
+                <p class="tagline">For all time. Always</p>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <i class="fas fa-gamepad"></i>
+                    <span class="stat-number">2</span>
+                    <span class="stat-label">Games Available</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-code"></i>
+                    <span class="stat-number">New</span>
+                    <span class="stat-label">Games in Development</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-star"></i>
+                    <span class="stat-number">Early</span>
+                    <span class="stat-label">Access</span>
+                </div>
+            </div>
+            <div class="hero-actions">
+                <a href="#games" class="action-btn primary">
+                    <i class="fas fa-play"></i>
+                    Browse Games
+                </a>
+                <a href="https://discord.gg/h6VcdseZMw" target="_blank" class="action-btn secondary">
+                    <i class="fab fa-discord"></i>
+                    Join Community
+                </a>
+            </div>
+            <div class="scroll-indicator">
+                <span class="scroll-text">Scroll to explore</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
         </div>
     </section>
 
     <section id="games" class="games-grid">
         <div class="game-card">
-            <img src="adventurequest.jpg" alt="Adventure Quest">
-            <h3>Adventure Quest</h3>
+            <img src="img/woodman.png" alt="Wood Man">
+            <h3>Wood Man</h3>
             <p>An epic RPG adventure</p>
-            <p class="version">Version: 1.0.2</p>
-            <a href="#" class="download-btn" onclick="downloadGame('Adventure Quest')">Download</a>
+            <p class="version">Version: 0.0.1</p>
+            <a href="https://drive.usercontent.google.com/download?id=1_fq_HotM8oRmtBTlHb1BNqGLJAw4hj21&export=download&authuser=0" class="download-btn" onclick="downloadGame('Wood Man')">Download</a>
         </div>
         <div class="game-card">
-            <img src="spacewarriors.jpg" alt="Space Warriors">
-            <h3>Space Warriors</h3>
-            <p>Sci-fi shooter</p>
-            <p class="version">Version: 2.1.0</p>
-            <a href="#" class="download-btn" onclick="downloadGame('Space Warriors')">Download</a>
+            <img src="img/spaceshooter.png" alt="Space Shooter">
+            <h3>Space Shooter</h3>
+            <p>Space shooting</p>
+            <p class="version">Version: 0.0.1</p>
+            <a href="https://drive.usercontent.google.com/download?id=1Oxjb-aPNtJuuQgae7pcyAKPT1D6pdT5b&export=download&authuser=0" class="download-btn" onclick="downloadGame('Space Shooter')">Download</a>
         </div>
     </section>
 
@@ -303,25 +388,97 @@
         function toggleSearch() {
             const searchContainer = document.getElementById('searchContainer');
             const searchIcon = document.querySelector('.nav-button .fa-search');
+            const searchInput = document.getElementById('searchInput');
+            
             searchContainer.classList.toggle('active');
             
             // Update search icon to indicate state
             if (searchContainer.classList.contains('active')) {
                 searchIcon.style.color = '#4ecdc4';
+                // Focus the input when opening
+                setTimeout(() => searchInput.focus(), 100);
             } else {
                 searchIcon.style.color = 'white';
             }
         }
 
-        // Close search when clicking outside
+        // Close search when clicking outside, but not when clicking the search input or its container
         document.addEventListener('click', (e) => {
             const searchContainer = document.getElementById('searchContainer');
             const searchButton = document.querySelector('.nav-button');
             const searchIcon = document.querySelector('.nav-button .fa-search');
+            const searchInput = document.getElementById('searchInput');
             
-            if (!searchContainer.contains(e.target) && e.target !== searchButton && !searchButton.contains(e.target)) {
-                searchContainer.classList.remove('active');
-                searchIcon.style.color = 'white';
+            // Don't close if clicking the search input, container, or search button
+            if (e.target === searchInput || 
+                e.target === searchContainer || 
+                e.target === searchButton || 
+                searchButton.contains(e.target) ||
+                searchContainer.contains(e.target)) {
+                return;
+            }
+            
+            searchContainer.classList.remove('active');
+            searchIcon.style.color = 'white';
+        });
+
+        // Update close button functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const profileModal = document.getElementById('profileModal');
+            const closeBtn = document.getElementById('closeProfileBtn');
+
+            // Close button click handler
+            closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                profileModal.style.display = 'none';
+                if (window.sessionInterval) {
+                    clearInterval(window.sessionInterval);
+                }
+            });
+
+            // Click outside to close
+            profileModal.addEventListener('click', (e) => {
+                if (e.target === profileModal) {
+                    profileModal.style.display = 'none';
+                    if (window.sessionInterval) {
+                        clearInterval(window.sessionInterval);
+                    }
+                }
+            });
+        });
+
+        // Add this at the end of your script
+        window.addEventListener('DOMContentLoaded', () => {
+            // Global close modal function
+            window.closeModal = function() {
+                const modal = document.getElementById('profileModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    if (window.sessionInterval) {
+                        clearInterval(window.sessionInterval);
+                    }
+                }
+            };
+
+            // Add click event listener to close button
+            const closeBtn = document.getElementById('closeProfileBtn');
+            if (closeBtn) {
+                closeBtn.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeModal();
+                };
+            }
+
+            // Add click event listener to modal background
+            const modal = document.getElementById('profileModal');
+            if (modal) {
+                modal.onclick = function(e) {
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                };
             }
         });
     </script>

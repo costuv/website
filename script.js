@@ -1,6 +1,6 @@
 const games = [
-    { name: 'Adventure Quest', version: '1.0.2', description: 'An epic RPG adventure' },
-    { name: 'Space Warriors', version: '2.1.0', description: 'Sci-fi shooter' }
+    { name: 'Wood Man', version: '0.0.1', description: 'An epic RPG adventure' },
+    { name: 'Space Shooter', version: '0.0.1', description: 'Space shooting' }
 ];
 
 function searchGames() {
@@ -34,14 +34,15 @@ function searchGames() {
         hero.style.height = '100vh'; // Restore hero height
     }
     
-    // Update games grid
+    // Update games grid with correct image paths
     gamesGrid.innerHTML = '';
     games.forEach(game => {
         if (game.name.toLowerCase().includes(searchInput) || 
             game.description.toLowerCase().includes(searchInput)) {
+            const imageName = game.name.toLowerCase().replace(' ', '');
             gamesGrid.innerHTML += `
                 <div class="game-card">
-                    <img src="${game.name.toLowerCase().replace(' ', '')}.jpg" alt="${game.name}">
+                    <img src="img/${imageName}.png" alt="${game.name}">
                     <h3>${game.name}</h3>
                     <p>${game.description}</p>
                     <p class="version">Version: ${game.version}</p>
