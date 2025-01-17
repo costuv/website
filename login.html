@@ -39,8 +39,10 @@
 <!--test -->
     <!-- Add contact modal -->
     <div id="contactModal" class="modal">
-        <div class="modal-content contact">
-            <span class="close-btn" onclick="closeContactModal()">&times;</span>
+        <div class="modal-content">
+            <button class="close-btn" id="contactCloseBtn" onclick="closeContactModal()" aria-label="Close contact">
+                <span>&times;</span>
+            </button>
             <h2>Contact Us</h2>
             <form id="contactForm" class="contact-form">
                 <div class="form-group">
@@ -130,22 +132,39 @@
             }
         });
 
-        // Add these functions
+        // Updated modal handlers
+        const contactModal = document.getElementById('contactModal');
+        const contactCloseBtn = document.getElementById('contactCloseBtn');
+
         window.showContactModal = () => {
-            document.getElementById('contactModal').style.display = 'block';
+            contactModal.style.display = 'block';
         };
 
         window.closeContactModal = () => {
-            document.getElementById('contactModal').style.display = 'none';
+            contactModal.style.display = 'none';
         };
 
-        // Close modal when clicking outside
-        window.onclick = (event) => {
-            const modal = document.getElementById('contactModal');
-            if (event.target === modal) {
+        // Contact modal close handlers
+        document.addEventListener('DOMContentLoaded', () => {
+            // Close button click handler
+            contactCloseBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 closeContactModal();
-            }
-        };
+            });
+
+            // Click outside to close
+            contactModal.addEventListener('click', (e) => {
+                if (e.target === contactModal) {
+                    closeContactModal();
+                }
+            });
+
+            // Global close function
+            window.closeContactModal = () => {
+                contactModal.style.display = 'none';
+            };
+        });
 
         // Handle contact form submission
         document.getElementById('contactForm').addEventListener('submit', async (e) => {

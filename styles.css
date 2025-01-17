@@ -972,7 +972,6 @@ html {
 .modal-content {
     position: relative;
     background: rgba(30, 30, 40, 0.95);
-    margin: 15% auto;
     padding: 2rem;
     border-radius: 10px;
     max-width: 500px;
@@ -1000,6 +999,16 @@ html {
     z-index: 3001; /* Ensure close button is above modal content */
     border: none; /* Add this to ensure consistency */
     padding: 0; /* Add this to ensure consistency */
+    line-height: 0; /* Add this to fix vertical alignment */
+}
+
+.close-btn span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    transform: translateY(-1px); /* Fine-tune vertical position */
 }
 
 @media screen and (max-width: 768px) {
@@ -1022,21 +1031,6 @@ html {
 
     .modal-content {
         padding-top: 3rem; /* Add space for close button */
-    }
-}
-
-@media screen and (max-width: 768px) {
-    .modal-content {
-        margin: 10% auto;
-        width: 95%;
-        padding: 3rem 1.5rem 1.5rem; /* Increase top padding for close button */
-    }
-
-    .close-btn {
-        right: 0.5rem;
-        top: 0.5rem;
-        width: 40px; /* Slightly larger touch target */
-        height: 40px; /* Slightly larger touch target */
     }
 }
 
@@ -1080,6 +1074,58 @@ html {
         margin-top: -2px; /* Fine-tune vertical alignment */
     }
 }
+
+/* ...existing code... */
+.modal-content.contact {
+    position: relative;
+    padding-top: 60px; /* Make room for close button */
+}
+
+.modal-content.contact .close-btn {
+    position: fixed;
+    right: 1rem;
+    top: 1rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 3002;
+    border: none;
+    padding: 0;
+    line-height: 1;
+}
+
+.modal-content.contact .close-btn span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    transform: translateY(-1px);
+}
+
+@media screen and (max-width: 768px) {
+    .modal-content.contact {
+        margin: 0;
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .modal-content.contact .close-btn {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+    }
+}
+/* ...existing code... */
 
 .profile-info {
     margin-top: 1.5rem;
