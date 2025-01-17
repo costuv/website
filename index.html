@@ -16,6 +16,7 @@
             EmailAuthProvider,
             reauthenticateWithCredential
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDmioQV6hHN-8HflggR0Mu5fqIDdUmQySc",
@@ -23,11 +24,13 @@
             projectId: "authforcostuv",
             storageBucket: "authforcostuv.firebasestorage.app",
             messagingSenderId: "377159945543",
-            appId: "1:377159945543:web:380144eb6f5eb90de61062"
+            appId: "1:377159945543:web:380144eb6f5eb90de61062",
+            databaseURL: "https://authforcostuv-default-rtdb.firebaseio.com"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getDatabase(app);
 
         let loginTime = null;
 
@@ -54,6 +57,30 @@
                 userName.textContent = user.displayName || 'User';
                 userEmail.textContent = user.email;
                 welcomeMessage.textContent = `Welcome ${user.displayName || 'User'}`;
+
+                // Add real-time listener for user data
+                const userRef = ref(db, `users/${user.uid}`);
+                onValue(userRef, (snapshot) => {
+                    const userData = snapshot.val();
+                    console.log('Reading user data:', userData);
+                    
+                    if (userData) {
+                        // Update credits display
+                        const creditsElement = document.getElementById('navCredits');
+                        if (creditsElement) {
+                            creditsElement.textContent = userData.credits || 0;
+                        }
+                        
+                        // Update both credit displays
+                        const credits = userData.credits || 0;
+                        document.getElementById('navCredits').textContent = credits;
+                        document.getElementById('mobileCredits').textContent = credits;
+                        
+                        // Update username
+                        const userName = userData.username || user.displayName || 'User';
+                        document.getElementById('userName').textContent = userName;
+                    }
+                });
             });
 
             setupModalHandlers();
@@ -243,6 +270,10 @@
             <button class="nav-button mobile-profile" onclick="showProfile()">
                 <i class="fas fa-user"></i>
             </button>
+            <div class="mobile-credits">
+                <i class="fas fa-coins"></i>
+                <span id="mobileCredits">0</span>
+            </div>
             <button class="nav-button menu-toggle" onclick="toggleMenu()">
                 <i class="fas fa-bars"></i>
             </button>
@@ -253,6 +284,10 @@
         <div class="nav-links" id="navLinks">
             <a href="#home">Home</a>
             <a href="#games">Games</a>
+            <div class="credits-section">
+                <i class="fas fa-coins"></i>
+                <span id="navCredits">0</span>
+            </div>
             <div class="user-panel" id="userPanel">
                 <!-- Remove profile button, only keep the dropdown -->
                 <div class="user-dropdown">
@@ -333,10 +368,7 @@
                     Join Community
                 </a>
             </div>
-            <div class="scroll-indicator">
-                <span class="scroll-text">Scroll to explore</span>
-                <i class="fas fa-chevron-down"></i>
-            </div>
+           
         </div>
     </section>
 

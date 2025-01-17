@@ -1564,3 +1564,73 @@ html {
 .hero-content p {
     color: white;
 }
+
+/* Credits section styles */
+.credits-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    color: white;
+    margin: 0 1rem;
+}
+
+.credits-section i {
+    color: #ffd700;
+}
+
+#navCredits {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Show/hide credits section based on screen size */
+@media screen and (max-width: 768px) {
+    .credits-section {
+        display: none;
+    }
+}
+
+@media screen and (min-width: 769px) {
+    .credits-section {
+        display: flex;
+    }
+}
+
+/* Mobile credits display */
+.mobile-credits {
+    display: none;  /* Hidden by default */
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    padding: 0.5rem;
+    color: white;
+    align-items: center;
+    gap: 0.3rem;
+    height: 38px;  /* Match other nav buttons */
+    margin: 0;
+}
+
+.mobile-credits i {
+    color: #ffd700;
+    font-size: 0.9rem;
+}
+
+/* Update mobile nav controls to show credits */
+@media screen and (max-width: 768px) {
+    .credits-section {
+        display: none;  /* Hide desktop credits */
+    }
+
+    .mobile-credits {
+        display: flex;  /* Show mobile credits */
+    }
+
+    .nav-controls {
+        gap: 0.5rem;  /* Consistent spacing */
+    }
+}
+
+/* ...existing code... */
