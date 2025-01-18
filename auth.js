@@ -67,7 +67,6 @@ async function register(event) {
             username: username,
             credits: 0
         };
-
         // Store in Realtime Database
         await set(ref(db, `users/${user.uid}`), userData);
         console.log('User data stored:', userData);

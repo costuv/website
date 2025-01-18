@@ -16,7 +16,8 @@
             EmailAuthProvider,
             reauthenticateWithCredential
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDmioQV6hHN-8HflggR0Mu5fqIDdUmQySc",
@@ -254,6 +255,104 @@
                 clearInterval(window.sessionInterval);
             }
         };
+
+        let currentPurchase = null;
+
+        // Add purchase functions to window object
+        window.attemptPurchase = async (gameName, price, downloadUrl) => {
+            const auth = getAuth();
+            const user = auth.currentUser;
+            const db = getDatabase();
+            
+            const userRef = ref(db, `users/${user.uid}`);
+            const snapshot = await get(userRef);
+            const userData = snapshot.val();
+            const currentCredits = userData.credits || 0;
+
+            document.getElementById('purchaseGameName').textContent = gameName;
+            document.getElementById('purchasePrice').textContent = price;
+            document.getElementById('userCredits').textContent = currentCredits;
+
+            currentPurchase = {
+                gameName,
+                price,
+                downloadUrl,
+                userCredits: currentCredits
+            };
+
+            document.getElementById('purchaseModal').style.display = 'block';
+        };
+
+        window.confirmPurchase = async () => {
+            if (!currentPurchase) return;
+
+            const { gameName, price, downloadUrl, userCredits } = currentPurchase;
+
+            if (userCredits < price) {
+                showNotification('Not enough credits!', 'error');
+                return;
+            }
+
+            const auth = getAuth();
+            const user = auth.currentUser;
+            const db = getDatabase();
+
+            try {
+                // Use a transaction to ensure atomic update
+                const userRef = ref(db, `users/${user.uid}`);
+                const snapshot = await get(userRef);
+                const userData = snapshot.val();
+                
+                // Double check credits haven't changed
+                if (!userData || userData.credits < price) {
+                    showNotification('Not enough credits!', 'error');
+                    return;
+                }
+
+                // Update credits
+                await set(ref(db, `users/${user.uid}/credits`), userData.credits - price);
+
+                // Record the purchase
+                await set(ref(db, `users/${user.uid}/purchases/${gameName}`), {
+                    purchasedAt: Date.now(),
+                    price: price,
+                    downloadUrl: downloadUrl
+                });
+
+                // Start download
+                window.location.href = downloadUrl;
+                
+                showNotification(`Successfully purchased ${gameName}!`, 'success');
+                closePurchaseModal();
+            } catch (error) {
+                console.error('Purchase error:', error);
+                showNotification('Purchase failed. Please try again.', 'error');
+            }
+        };
+
+        window.closePurchaseModal = () => {
+            document.getElementById('purchaseModal').style.display = 'none';
+            currentPurchase = null;
+        };
+
+        // Add event listeners for purchase modal
+        document.addEventListener('DOMContentLoaded', () => {
+            const purchaseModal = document.getElementById('purchaseModal');
+            
+            // Click outside to close
+            purchaseModal.addEventListener('click', (e) => {
+                if (e.target === purchaseModal) {
+                    closePurchaseModal();
+                }
+            });
+
+            // Close button
+            const closeBtn = purchaseModal.querySelector('.close-btn');
+            closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                closePurchaseModal();
+            });
+        });
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <noscript>
@@ -375,17 +474,19 @@
     <section id="games" class="games-grid">
         <div class="game-card">
             <img src="img/woodman.png" alt="Wood Man">
-            <h3>Wood Man</h3>
+            <h3 class="smesh">Wood Man</h3>
             <p>An epic RPG adventure</p>
             <p class="version">Version: 0.0.1</p>
-            <a href="https://drive.usercontent.google.com/download?id=1_fq_HotM8oRmtBTlHb1BNqGLJAw4hj21&export=download&authuser=0" class="download-btn" onclick="downloadGame('Wood Man')">Download</a>
+            <p class="price smesh">Credits: 100</p>
+            <button class="download-btn smesh" onclick="attemptPurchase('Wood Man', 100, 'https://drive.usercontent.google.com/download?id=1_fq_HotM8oRmtBTlHb1BNqGLJAw4hj21&export=download&authuser=0')">Buy & Download</button>
         </div>
         <div class="game-card">
             <img src="img/spaceshooter.png" alt="Space Shooter">
-            <h3>Space Shooter</h3>
+            <h3 class="smesh">Space Shooter</h3>
             <p>Space shooting</p>
             <p class="version">Version: 0.0.1</p>
-            <a href="https://drive.usercontent.google.com/download?id=1Oxjb-aPNtJuuQgae7pcyAKPT1D6pdT5b&export=download&authuser=0" class="download-btn" onclick="downloadGame('Space Shooter')">Download</a>
+            <p class="price smesh">Credits: 50</p>
+            <button class="download-btn smesh" onclick="attemptPurchase('Space Shooter', 50, 'https://drive.usercontent.google.com/download?id=1Oxjb-aPNtJuuQgae7pcyAKPT1D6pdT5b&export=download&authuser=0')">Buy & Download</button>
         </div>
         <div class="game-card">
             <img src="img/dustracing.png" alt="Dust Racing">
@@ -395,6 +496,25 @@
             <a href="#" class="download-btn" onclick="downloadGame('Dust Racing')">Download</a>
         </div>
     </section>
+
+    <!-- Update Purchase Modal -->
+    <div id="purchaseModal" class="modal purchase-modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closePurchaseModal()">
+                <span>×</span>
+            </button>
+            <h2 class="smesh">Confirm Purchase</h2>
+            <div class="purchase-info">
+                <p class="smesh">Game: <span id="purchaseGameName"></span></p>
+                <p class="smesh">Price: <span id="purchasePrice"></span> credits</p>
+                <p class="smesh">Your Credits: <span id="userCredits"></span></p>
+            </div>
+            <div class="purchase-actions">
+                <button onclick="confirmPurchase()" class="confirm-btn smesh">Confirm Purchase</button>
+                <button onclick="closePurchaseModal()" class="cancel-btn smesh">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <footer class="footer">
         <div class="social-links">
