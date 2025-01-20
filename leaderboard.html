@@ -260,7 +260,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDmioQV6hHN-8HflggR0Mu5fqIDdUmQySc",
@@ -272,62 +272,103 @@
             databaseURL: "https://authforcostuv-default-rtdb.firebaseio.com"
         };
 
+        console.log('Initializing Firebase...');
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getDatabase(app);
+        const db = getDatabase();
 
+        function updateLeaderboardUI(data) {
+            const leaderboardList = document.getElementById('leaderboardList');
+            console.log('Raw data:', data);
+            
+            try {
+                leaderboardList.innerHTML = '';
+                
+                if (!data) {
+                    leaderboardList.innerHTML = '<div class="no-data">No lap times recorded yet</div>';
+                    return;
+                }
+
+                // Debug log
+                console.log('Processing users:', Object.keys(data).length);
+
+                const validEntries = Object.entries(data)
+                    .filter(([_, user]) => {
+                        const isValid = user && user.username && typeof user.lapTime === 'number';
+                        if (!isValid) {
+                            console.log('Filtered out user:', user);
+                        }
+                        return isValid;
+                    });
+
+                console.log('Valid entries:', validEntries.length);
+
+                const sortedTimes = validEntries
+                    .map(([_, user]) => ({
+                        username: user.username,
+                        lapTime: user.lapTime
+                    }))
+                    .sort((a, b) => a.lapTime - b.lapTime);
+
+                console.log('Sorted times:', sortedTimes);
+
+                if (sortedTimes.length === 0) {
+                    leaderboardList.innerHTML = '<div class="no-data">No lap times recorded yet</div>';
+                    return;
+                }
+
+                sortedTimes.forEach((entry, index) => {
+                    const minutes = Math.floor(entry.lapTime / 60000);
+                    const seconds = Math.floor((entry.lapTime % 60000) / 1000);
+                    const milliseconds = entry.lapTime % 1000;
+                    const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+                    
+                    const entryElement = document.createElement('div');
+                    entryElement.className = 'leaderboard-entry';
+                    entryElement.innerHTML = `
+                        <span class="rank">#${index + 1}</span>
+                        <span class="username">${entry.username}</span>
+                        <span class="time">${formattedTime}</span>
+                    `;
+                    leaderboardList.appendChild(entryElement);
+                });
+            } catch (error) {
+                console.error('Error in updateLeaderboardUI:', error);
+                leaderboardList.innerHTML = '<div class="error">Error updating leaderboard: ' + error.message + '</div>';
+            }
+        }
+
+        // Setup the database listener
+        function setupLeaderboard() {
+            console.log('Setting up leaderboard...');
+            const usersRef = ref(db, 'users');
+            
+            onValue(usersRef, (snapshot) => {
+                console.log('Got database update');
+                const data = snapshot.val();
+                console.log('Snapshot data:', data);
+                updateLeaderboardUI(data);
+            }, (error) => {
+                console.error('Database error:', error);
+                const leaderboardList = document.getElementById('leaderboardList');
+                leaderboardList.innerHTML = '<div class="error">Failed to load leaderboard: ' + error.message + '</div>';
+            });
+        }
+
+        // Wait for authentication
         onAuthStateChanged(auth, (user) => {
+            console.log('Auth state changed:', user ? 'logged in' : 'logged out');
             if (!user) {
                 window.location.href = 'login.html';
                 return;
             }
-            loadLeaderboard();
+            setupLeaderboard();
         });
 
-        async function loadLeaderboard() {
-            const leaderboardList = document.getElementById('leaderboardList');
-            
-            try {
-                const snapshot = await get(ref(db, 'leaderboard'));
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    const sortedTimes = Object.entries(data)
-                        .map(([uid, entry]) => ({
-                            username: entry.username,
-                            lapTime: entry.lapTime
-                        }))
-                        .sort((a, b) => a.lapTime - b.lapTime);
-
-                    leaderboardList.innerHTML = '';
-                    
-                    if (sortedTimes.length === 0) {
-                        leaderboardList.innerHTML = '<div class="no-data">No lap times recorded yet</div>';
-                        return;
-                    }
-
-                    sortedTimes.forEach((entry, index) => {
-                        const minutes = Math.floor(entry.lapTime / 60000);
-                        const seconds = Math.floor((entry.lapTime % 60000) / 1000);
-                        const milliseconds = entry.lapTime % 1000;
-                        const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
-                        
-                        const entryElement = document.createElement('div');
-                        entryElement.className = 'leaderboard-entry';
-                        entryElement.innerHTML = `
-                            <span class="rank">#${index + 1}</span>
-                            <span class="username">${entry.username}</span>
-                            <span class="time">${formattedTime}</span>
-                        `;
-                        leaderboardList.appendChild(entryElement);
-                    });
-                } else {
-                    leaderboardList.innerHTML = '<div class="no-data">No lap times recorded yet</div>';
-                }
-            } catch (error) {
-                console.error('Error fetching leaderboard:', error);
-                leaderboardList.innerHTML = '<div class="error">Failed to load leaderboard. Please try again later.</div>';
-            }
-        }
+        // Additional error handling
+        window.addEventListener('unhandledrejection', event => {
+            console.error('Unhandled promise rejection:', event.reason);
+        });
     </script>
 </body>
 </html>
