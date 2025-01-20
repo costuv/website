@@ -1146,11 +1146,11 @@ html {
 /* ...existing code... */
 
 .profile-info {
-    margin-top: 1.5rem;
+    margin-top: 2rem;
 }
 
 .profile-info p {
-    margin: 1rem 0;
+    margin: 2rem 0;
     padding: 0.5rem;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 5px;
@@ -1764,3 +1764,47 @@ html {
     }
 }
 /* ...existing code... */
+
+/* Update game card button styles */
+.game-card .leaderboard-btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 1rem;
+    border: none;
+    transition: all 0.3s ease;
+    text-align: center;
+    cursor: pointer;
+}
+
+.game-card .leaderboard-btn:hover {
+    background: linear-gradient(45deg, #2980b9, #3498db);
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.4);
+}
+
+.game-card .leaderboard-btn i {
+    margin-right: 8px;
+}
+
+/* ...existing code... */
+.download-btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(45deg, #4ecdc4, #45b7af);
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 1rem;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+    background: linear-gradient(45deg, #45b7af, #4ecdc4);
+    box-shadow: 0 0 15px rgba(78, 205, 196, 0.4);
+    transform: translateY(-2px);
+}

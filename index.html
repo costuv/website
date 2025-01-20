@@ -259,28 +259,15 @@
         let currentPurchase = null;
 
         // Add purchase functions to window object
-        window.attemptPurchase = async (gameName, price, downloadUrl) => {
-            const auth = getAuth();
-            const user = auth.currentUser;
-            const db = getDatabase();
+        window.attemptPurchase = (gameName, price, downloadUrl) => {
+            // No need to get credits here anymore
+            const params = new URLSearchParams({
+                game: gameName,
+                price: price,
+                url: downloadUrl
+            });
             
-            const userRef = ref(db, `users/${user.uid}`);
-            const snapshot = await get(userRef);
-            const userData = snapshot.val();
-            const currentCredits = userData.credits || 0;
-
-            document.getElementById('purchaseGameName').textContent = gameName;
-            document.getElementById('purchasePrice').textContent = price;
-            document.getElementById('userCredits').textContent = currentCredits;
-
-            currentPurchase = {
-                gameName,
-                price,
-                downloadUrl,
-                userCredits: currentCredits
-            };
-
-            document.getElementById('purchaseModal').style.display = 'block';
+            window.location.href = `purchase.html?${params.toString()}`;
         };
 
         window.confirmPurchase = async () => {
@@ -353,6 +340,7 @@
                 closePurchaseModal();
             });
         });
+
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <noscript>
@@ -413,8 +401,8 @@
             <button class="close-btn" id="closeProfileBtn" onclick="closeModal()" aria-label="Close profile">
                 <span>×</span>
             </button>
-            <h2>User Profile</h2>
             <div class="profile-info">
+                <h2>User Profile</h2>
                 <p><strong>Username:</strong> <span id="profileName"></span></p>
                 <p><strong>Email:</strong> <span id="profileEmail"></span></p>
                 <p><strong>Session Duration:</strong> <span id="sessionTime"></span></p>
@@ -443,7 +431,7 @@
             <div class="hero-stats">
                 <div class="stat-item">
                     <i class="fas fa-gamepad"></i>
-                    <span class="stat-number">2</span>
+                    <span class="stat-number">3</span>
                     <span class="stat-label">Games Available</span>
                 </div>
                 <div class="stat-item">
@@ -476,7 +464,7 @@
             <img src="img/woodman.png" alt="Wood Man">
             <h3 class="smesh">Wood Man</h3>
             <p>An epic RPG adventure</p>
-            <p class="version">Version: 0.0.1</p>
+            <p class="version">Version: 1.0.0</p>
             <p class="price smesh">Credits: 100</p>
             <button class="download-btn smesh" onclick="attemptPurchase('Wood Man', 100, 'https://drive.usercontent.google.com/download?id=1_fq_HotM8oRmtBTlHb1BNqGLJAw4hj21&export=download&authuser=0')">Buy & Download</button>
         </div>
@@ -484,7 +472,7 @@
             <img src="img/spaceshooter.png" alt="Space Shooter">
             <h3 class="smesh">Space Shooter</h3>
             <p>Space shooting</p>
-            <p class="version">Version: 0.0.1</p>
+            <p class="version">Version: 1.0.0</p>
             <p class="price smesh">Credits: 50</p>
             <button class="download-btn smesh" onclick="attemptPurchase('Space Shooter', 50, 'https://drive.usercontent.google.com/download?id=1Oxjb-aPNtJuuQgae7pcyAKPT1D6pdT5b&export=download&authuser=0')">Buy & Download</button>
         </div>
@@ -492,8 +480,12 @@
             <img src="img/dustracing.png" alt="Dust Racing">
             <h3>Dust Racing</h3>
             <p>A thrilling racing game</p>
-            <p class="version">Version: 0.0.1</p>
-            <a href="#" class="download-btn" onclick="downloadGame('Dust Racing')">Download</a>
+            <p class="version">Version: 1.0.0</p>
+            <p class="price smesh">Credits: 500</p>
+            <button class="download-btn smesh">Coming on 29th January</button>
+            <a href="leaderboard.html" class="leaderboard-btn smesh">
+                <i class="fas fa-trophy"></i> Leaderboard
+            </a>
         </div>
     </section>
 
