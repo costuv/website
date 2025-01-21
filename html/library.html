@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library | Costuv</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/loader.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: #000000;
+            min-height: 100vh;
+            padding-top: 80px;
+            color: white;
+        }
+
+        .games-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.8rem;
+            margin: 2rem 0 3rem;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .library-container {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            padding: 1rem 0 2rem;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 2rem;
+        }
+
+        .library-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .library-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .library-container::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 4px;
+        }
+
+        .game-card {
+            flex: 0 0 350px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(52, 152, 219, 0.2);
+        }
+
+        .game-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-card h3 {
+            font-size: 1.8rem;
+            margin: 0.5rem 0;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .purchased-date {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: #4ecdc4;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .download-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+            text-decoration: none;
+            margin-top: 1rem;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .no-games {
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 0 auto;
+        }
+
+        .no-games i {
+            font-size: 2rem;
+            color: #ffffff;
+            margin-bottom: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .no-games p {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: #fff;
+            opacity: 0.9;
+        }
+
+        .no-games .download-btn {
+            max-width: 160px;
+            margin: 0 auto;
+            padding: 0.5rem 1rem;  /* Reduced vertical padding */
+            font-size: 0.9rem;
+            height: 36px;         /* Fixed height */
+            line-height: 1;       /* Adjust line height */
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .scroll-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .scroll-btn {
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scroll-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .games-section {
+                padding: 1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+                margin: 1.5rem 0;
+            }
+
+            .game-card {
+                flex: 0 0 280px;
+            }
+
+            .game-card h3 {
+                font-size: 1.5rem;
+            }
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        nav .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        nav .nav-links a:hover {
+            color: #3498db;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 0.8rem 1rem;
+            }
+            
+            nav .logo {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body class="loading">
+    <nav>
+        <div class="logo">COSTUV</div>
+        <div class="nav-links">
+            <a href="/index.html">Home</a>
+        </div>
+    </nav>
+
+    <section class="games-section">
+        <h1 class="section-title">Library</h1>
+        <div id="libraryGames" class="library-container">
+            <div class="loading">Loading your games...</div>
+        </div>
+        <!--<div class="scroll-buttons">
+            <button class="scroll-btn" onclick="scrollLibrary('left')">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="scroll-btn" onclick="scrollLibrary('right')">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>-->
+    </section>
+
+    <script>
+        function scrollLibrary(direction) {
+            const container = document.querySelector('.library-container');
+            const scrollAmount = 370; // card width + gap
+            if (direction === 'left') {
+                container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDmioQV6hHN-8HflggR0Mu5fqIDdUmQySc",
+            authDomain: "authforcostuv.firebaseapp.com",
+            projectId: "authforcostuv",
+            storageBucket: "authforcostuv.firebasestorage.app",
+            messagingSenderId: "377159945543",
+            appId: "1:377159945543:web:380144eb6f5eb90de61062",
+            databaseURL: "https://authforcostuv-default-rtdb.firebaseio.com"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = '/html/login.html';
+                return;
+            }
+
+            const libraryRef = ref(db, `users/${user.uid}/library`);
+            onValue(libraryRef, (snapshot) => {
+                const libraryContainer = document.getElementById('libraryGames');
+                const library = snapshot.val();
+
+                if (!library) {
+                    libraryContainer.innerHTML = `
+                        <div class="no-games">
+                            <i class="fas fa-shopping-cart"></i>
+                            <p>No games in your library yet</p>
+                            <a href="/index.html#games" class="download-btn">
+                                Browse Games
+                            </a>
+                        </div>`;
+                    return;
+                }
+
+                libraryContainer.innerHTML = '';
+                Object.entries(library).forEach(([gameName, gameData]) => {
+                    const gameCard = document.createElement('div');
+                    gameCard.className = 'game-card';
+                    gameCard.innerHTML = `
+                        <img src="/img/${gameName.toLowerCase().replace(' ', '')}.png" alt="${gameName}">
+                        <h3 class="smesh">${gameName}</h3>
+                        <p class="purchased-date">
+                            <i class="fas fa-clock"></i>
+                            Purchased: ${new Date(gameData.purchasedAt).toLocaleDateString()}
+                        </p>
+                        <a href="${gameData.downloadUrl}" class="download-btn smesh">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    `;
+                    libraryContainer.appendChild(gameCard);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

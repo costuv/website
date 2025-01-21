@@ -458,6 +458,7 @@
         <div class="nav-links" id="navLinks">
             <a href="#home">Home</a>
             <a href="#games">Games</a>
+            <a href="/html/library.html">Library</a>
             <div class="credits-section">
                 <i class="fas fa-coins"></i>
                 <span id="navCredits">0</span>
@@ -634,34 +635,66 @@
             
             searchContainer.classList.toggle('active');
             
-            // Update search icon to indicate state
             if (searchContainer.classList.contains('active')) {
                 searchIcon.style.color = '#4ecdc4';
-                // Focus the input when opening
                 setTimeout(() => searchInput.focus(), 100);
             } else {
                 searchIcon.style.color = 'white';
+                searchInput.value = '';
+                resetGameVisibility();
             }
         }
 
-        // Close search when clicking outside, but not when clicking the search input or its container
-        document.addEventListener('click', (e) => {
-            const searchContainer = document.getElementById('searchContainer');
-            const searchButton = document.querySelector('.nav-button');
-            const searchIcon = document.querySelector('.nav-button .fa-search');
-            const searchInput = document.getElementById('searchInput');
-            
-            // Don't close if clicking the search input, container, or search button
-            if (e.target === searchInput || 
-                e.target === searchContainer || 
-                e.target === searchButton || 
-                searchButton.contains(e.target) ||
-                searchContainer.contains(e.target)) {
-                return;
+        function resetGameVisibility() {
+            document.querySelectorAll('.game-card').forEach(card => {
+                card.style.display = 'block';
+            });
+        }
+
+        function filterGames() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const gamesSection = document.getElementById('games');
+            const gameCards = document.querySelectorAll('.game-card');
+            let hasResults = false;
+
+            gameCards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                
+                if (searchTerm === '' || title.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    hasResults = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            if (searchTerm && hasResults) {
+                gamesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-            
-            searchContainer.classList.remove('active');
-            searchIcon.style.color = 'white';
+        }
+
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(filterGames, 300);
+            });
+
+            document.addEventListener('click', (e) => {
+                const searchContainer = document.getElementById('searchContainer');
+                const searchButton = document.querySelector('.nav-button');
+                const searchIcon = document.querySelector('.nav-button .fa-search');
+                
+                if (!searchContainer.contains(e.target) && !searchButton.contains(e.target)) {
+                    searchContainer.classList.remove('active');
+                    searchIcon.style.color = 'white';
+                    resetGameVisibility();
+                }
+            });
         });
 
         // Update close button functionality
