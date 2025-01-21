@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Costuv</title>
+    <!-- Add favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/site.webmanifest">
     <link rel="stylesheet" href="styles.css">
     <script type="module" src="auth.js"></script>
     <script src="loader.js"></script>
@@ -260,8 +265,23 @@
         let currentPurchase = null;
 
         // Add purchase functions to window object
-        window.attemptPurchase = (gameName, price, downloadUrl) => {
-            // No need to get credits here anymore
+        window.attemptPurchase = async (gameName, price, downloadUrl) => {
+            const user = auth.currentUser;
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Check if user already owns the game
+            const userRef = ref(db, `users/${user.uid}/library/${gameName}`);
+            const snapshot = await get(userRef);
+            
+            if (snapshot.exists()) {
+                showNotification('You already own this game!', 'error');
+                return;
+            }
+
+            // If not owned, proceed to purchase page
             const params = new URLSearchParams({
                 game: gameName,
                 price: price,
@@ -269,6 +289,22 @@
             });
             
             window.location.href = `purchase.html?${params.toString()}`;
+        };
+
+        // Add download function for owned games
+        window.downloadGame = async (gameName) => {
+            const user = auth.currentUser;
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const libraryRef = ref(db, `users/${user.uid}/library/${gameName}`);
+            const snapshot = await get(libraryRef);
+            
+            if (snapshot.exists()) {
+                window.location.href = snapshot.val().downloadUrl;
+            }
         };
 
         window.confirmPurchase = async () => {
@@ -340,6 +376,56 @@
                 e.preventDefault();
                 closePurchaseModal();
             });
+        });
+
+        function updateGameButtons() {
+            const games = [
+                {
+                    id: 'woodman',
+                    name: 'Wood Man',
+                    price: 100,
+                    url: 'https://drive.usercontent.google.com/download?id=1_fq_HotM8oRmtBTlHb1BNqGLJAw4hj21&export=download&authuser=0'
+                },
+                {
+                    id: 'spaceshooter',
+                    name: 'Space Shooter',
+                    price: 50,
+                    url: 'https://drive.usercontent.google.com/download?id=1Oxjb-aPNtJuuQgae7pcyAKPT1D6pdT5b&export=download&authuser=0'
+                }
+            ];
+
+            const user = auth.currentUser;
+            if (!user) return;
+
+            games.forEach(game => {
+                const buttonsContainer = document.getElementById(`${game.id}-buttons`);
+                const libraryRef = ref(db, `users/${user.uid}/library/${game.name}`);
+                
+                onValue(libraryRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        // User owns the game
+                        buttonsContainer.innerHTML = `
+                            <button class="download-btn smesh" onclick="downloadGame('${game.name}')">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        `;
+                    } else {
+                        // User doesn't own the game
+                        buttonsContainer.innerHTML = `
+                            <button class="download-btn smesh" onclick="attemptPurchase('${game.name}', ${game.price}, '${game.url}')">
+                                Buy & Download
+                            </button>
+                        `;
+                    }
+                });
+            });
+        }
+
+        // Call updateGameButtons when auth state changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                updateGameButtons();
+            }
         });
 
     </script>
@@ -467,7 +553,9 @@
             <p>An epic RPG adventure</p>
             <p class="version">Version: 1.0.0</p>
             <p class="price smesh">Credits: 100</p>
-            <button class="download-btn smesh" onclick="attemptPurchase('Wood Man', 100, 'https://drive.usercontent.google.com/download?id=1_fq_HotM8oRmtBTlHb1BNqGLJAw4hj21&export=download&authuser=0')">Buy & Download</button>
+            <div id="woodman-buttons">
+                <div class="loading">Checking library...</div>
+            </div>
         </div>
         <div class="game-card">
             <img src="img/spaceshooter.png" alt="Space Shooter">
@@ -475,7 +563,9 @@
             <p>Space shooting</p>
             <p class="version">Version: 1.0.0</p>
             <p class="price smesh">Credits: 50</p>
-            <button class="download-btn smesh" onclick="attemptPurchase('Space Shooter', 50, 'https://drive.usercontent.google.com/download?id=1Oxjb-aPNtJuuQgae7pcyAKPT1D6pdT5b&export=download&authuser=0')">Buy & Download</button>
+            <div id="spaceshooter-buttons">
+                <div class="loading">Checking library...</div>
+            </div>
         </div>
         <div class="game-card">
             <img src="img/dustracing.png" alt="Dust Racing">

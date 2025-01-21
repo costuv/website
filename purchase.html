@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirm Purchase | Costuv</title>
+    <!-- Add favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/site.webmanifest">
     <link rel="stylesheet" href="styles.css">
     <script src="loader.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -347,6 +352,19 @@
             const userRef = ref(db, `users/${user.uid}`);
             
             try {
+                // Check if user already owns the game
+                const libraryRef = ref(db, `users/${user.uid}/library/${gameName}`);
+                const librarySnapshot = await get(libraryRef);
+                
+                if (librarySnapshot.exists()) {
+                    showNotification('You already own this game!', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                    return;
+                }
+
+                // Get user data for credits check
                 const snapshot = await get(userRef);
                 const userData = snapshot.val();
                 const currentCredits = userData.credits || 0;
@@ -359,8 +377,8 @@
                 // Update credits
                 await set(ref(db, `users/${user.uid}/credits`), currentCredits - price);
 
-                // Record purchase
-                await set(ref(db, `users/${user.uid}/purchases/${gameName}`), {
+                // Add to user's library
+                await set(ref(db, `users/${user.uid}/library/${gameName}`), {
                     purchasedAt: Date.now(),
                     price: price,
                     downloadUrl: downloadUrl
