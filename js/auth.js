@@ -77,7 +77,7 @@ async function register(event) {
         });
 
         alert('Registration successful!');
-        window.location.href = 'login.html';
+        window.location.href = 'html/login.html';
     } catch (error) {
         console.error('Registration error:', error);
         alert('Error: ' + error.message);
@@ -87,7 +87,7 @@ async function register(event) {
 function logout() {
     signOut(window.auth)
         .then(() => {
-            window.location.href = 'login.html';
+            window.location.href = 'html/login.html';
         })
         .catch((error) => {
             console.error('Error signing out:', error);
@@ -107,8 +107,8 @@ onAuthStateChanged(auth, async (user) => {
         if (logoutBtn) logoutBtn.style.display = 'inline-block';
         
         // Redirect if on login/register page
-        if (window.location.href.includes('login.html') || 
-            window.location.href.includes('register.html')) {
+        if (window.location.href.includes('html/login.html') || 
+            window.location.href.includes('html/register.html')) {
             window.location.href = 'index.html';
         }
 
@@ -169,9 +169,9 @@ onAuthStateChanged(auth, async (user) => {
         if (logoutBtn) logoutBtn.style.display = 'none';
         
         // Redirect to login if on protected page
-        if (!window.location.href.includes('login.html') && 
-            !window.location.href.includes('register.html')) {
-            window.location.href = 'login.html';
+        if (!window.location.href.includes('html/login.html') && 
+            !window.location.href.includes('html/register.html')) {
+            window.location.href = 'html/login.html';
         }
     }
 });

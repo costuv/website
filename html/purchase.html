@@ -9,8 +9,8 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
     <link rel="manifest" href="favicon/site.webmanifest">
-    <link rel="stylesheet" href="styles.css">
-    <script src="loader.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/loader.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
@@ -294,7 +294,7 @@
             // Game descriptions object
             const gameDescriptions = {
                 'Wood Man': 'An epic RPG adventure.',
-                'Space Shooter': 'An action-packed space shooting game.',
+                'Space Shooter': 'An space shooting game.',
                 'Dust Racing': 'A thrilling racing game.'
             };
 
@@ -336,7 +336,7 @@
                         }
                     });
                 } else {
-                    window.location.href = 'login.html';
+                    window.location.href = 'html/login.html';
                 }
             });
         };
@@ -344,7 +344,7 @@
         window.confirmPurchase = async () => {
             const user = auth.currentUser;
             if (!user) {
-                window.location.href = 'login.html';
+                window.location.href = 'html/login.html';
                 return;
             }
 
