@@ -93,8 +93,8 @@
 
         .purchased-date {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            align-items: left;
+            justify-content: left;
             gap: 0.5rem;
             color: #4ecdc4;
             margin: 1rem 0;
@@ -207,53 +207,64 @@
             top: 0;
             left: 0;
             width: 100%;
+            height: 60px;
             z-index: 1000;
             background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 0 2rem;
         }
 
         nav .logo {
+            height: 36px;
+            display: flex;
+            align-items: center;
             font-size: 1.5rem;
             font-weight: bold;
             color: white;
-            text-decoration: none;
         }
 
         nav .nav-links {
+            height: 40px;
             display: flex;
-            gap: 1.5rem;
             align-items: center;
         }
 
         nav .nav-links a {
             color: white;
             text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        nav .nav-links a:hover {
-            color: #3498db;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            padding: 6px 14px;
         }
 
         @media (max-width: 768px) {
             nav {
-                padding: 0.8rem 1rem;
+                padding: 0 1rem;
             }
             
             nav .logo {
                 font-size: 1.2rem;
+            }
+
+            nav .nav-links a {
+                font-size: 0.95rem;
             }
         }
     </style>
 </head>
 <body class="loading">
     <nav>
-        <div class="logo hit">COSTUV</div>
+        <div class="logo">COSTUV</div>
         <div class="nav-links">
             <a href="/index.html">Home</a>
         </div>
@@ -289,7 +300,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDmioQV6hHN-8HflggR0Mu5fqIDdUmQySc",
@@ -331,22 +342,108 @@
                 libraryContainer.innerHTML = '';
                 Object.entries(library).forEach(([gameName, gameData]) => {
                     const gameCard = document.createElement('div');
-                    gameCard.className = 'game-card';
+                    gameCard.className = 'library-card';
                     gameCard.innerHTML = `
                         <img src="/img/${gameName.toLowerCase().replace(' ', '')}.png" alt="${gameName}">
-                        <h3 class="smesh">${gameName}</h3>
-                        <p class="purchased-date">
-                            <i class="fas fa-clock"></i>
-                            Purchased: ${new Date(gameData.purchasedAt).toLocaleDateString()}
-                        </p>
-                        <a href="${gameData.downloadUrl}" class="download-btn smesh">
-                            <i class="fas fa-download"></i> Download
-                        </a>
+                        <div class="game-info">
+                            <h3 class="smesh">${gameName}</h3>
+                            <span class="version">Version 1.0.0</span>
+                            <p class="purchased-date">
+                                <i class="fas fa-clock"></i>
+                                Purchased: ${new Date(gameData.purchasedAt).toLocaleDateString()}
+                            </p>
+                        </div>
+                        <div class="library-actions">
+                            <a href="${gameData.downloadUrl}" class="download-btn">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                            <button class="delete-btn" onclick="deleteGame('${gameName}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
                     `;
                     libraryContainer.appendChild(gameCard);
                 });
             });
         });
+
+        // Add delete game function to window scope
+        window.deleteGame = async (gameName) => {
+            const auth = getAuth();
+            const user = auth.currentUser;
+            
+            if (!user) return;
+
+            // Create and show confirmation notification
+            const notification = document.createElement('div');
+            notification.className = 'notification confirm';
+            notification.innerHTML = `
+                <span class="message">Are you sure you want to remove ${gameName} from your library?</span>
+                <div class="confirm-actions">
+                    <button class="cancel-btn">Cancel</button>
+                    <button class="confirm-btn">Delete</button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            // Show notification with animation
+            setTimeout(() => notification.classList.add('show'), 10);
+
+            // Handle confirmation through Promise
+            new Promise((resolve) => {
+                const confirmBtn = notification.querySelector('.confirm-btn');
+                const cancelBtn = notification.querySelector('.cancel-btn');
+                
+                confirmBtn.onclick = () => {
+                    notification.remove();
+                    resolve(true);
+                };
+                
+                cancelBtn.onclick = () => {
+                    notification.remove();
+                    resolve(false);
+                };
+            }).then(async (confirmed) => {
+                if (confirmed) {
+                    try {
+                        const gameRef = ref(db, `users/${user.uid}/library/${gameName}`);
+                        await remove(gameRef);
+                        
+                        // Show success notification
+                        const successNotif = document.createElement('div');
+                        successNotif.className = 'notification success';
+                        successNotif.innerHTML = `
+                            <i class="fas fa-check-circle"></i>
+                            <span>Game removed successfully</span>
+                        `;
+                        document.body.appendChild(successNotif);
+                        setTimeout(() => successNotif.classList.add('show'), 10);
+                        
+                        // Remove success notification after 3 seconds
+                        setTimeout(() => {
+                            successNotif.classList.remove('show');
+                            setTimeout(() => successNotif.remove(), 300);
+                        }, 3000);
+                    } catch (error) {
+                        // Show error notification
+                        const errorNotif = document.createElement('div');
+                        errorNotif.className = 'notification error';
+                        errorNotif.innerHTML = `
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Failed to remove game</span>
+                        `;
+                        document.body.appendChild(errorNotif);
+                        setTimeout(() => errorNotif.classList.add('show'), 10);
+                        
+                        // Remove error notification after 3 seconds
+                        setTimeout(() => {
+                            errorNotif.classList.remove('show');
+                            setTimeout(() => errorNotif.remove(), 300);
+                        }, 3000);
+                    }
+                }
+            });
+        };
     </script>
 </body>
 </html>

@@ -969,6 +969,58 @@ html {
     font-size: 20px;
 }
 
+/* Enhanced notification styles */
+.notification {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    padding: 15px 25px;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    max-width: 400px;
+    width: 90%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.notification.success {
+    background: rgba(78, 205, 196, 0.95);
+    border: 1px solid rgba(78, 205, 196, 0.3);
+}
+
+.notification.error {
+    background: rgba(255, 107, 107, 0.95);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.notification i {
+    font-size: 1.2rem;
+}
+
+/* Mobile notification adjustments */
+@media screen and (max-width: 768px) {
+    .notification {
+        width: calc(100% - 32px);
+        padding: 12px 20px;
+        top: 70px;
+    }
+}
+
 /* Modal styles */
 .modal {
     display: none;
@@ -1883,3 +1935,449 @@ body.loading {
 }
 
 /* ...rest of existing code... */
+
+/* Fixed Navigation Styles */
+@media screen and (max-width: 768px) {
+    nav {
+        padding: 0.8rem;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(10px);
+    }
+
+    .logo {
+        font-size: 1.5rem;
+        white-space: nowrap;
+    }
+
+    /* Prevent horizontal scroll */
+    body {
+        overflow-x: hidden;
+        width: 100%;
+        position: relative;
+    }
+
+    /* Game card image fixes */
+    .game-card {
+        width: 100%;
+        max-width: 350px;
+        margin: 0 auto;
+    }
+
+    .game-card img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        max-width: 300px;
+        margin: 0 auto;
+        display: block;
+    }
+
+    /* Container fixes */
+    .games-grid {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+        overflow: visible;
+    }
+
+    .library-container {
+        padding: 80px 1rem 2rem 1rem;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Modal scroll fixes */
+    .modal-content {
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 100vh;
+        padding-bottom: 2rem;
+    }
+
+    /* Prevent content from being hidden under nav */
+    main, 
+    .auth-container,
+    .library-container {
+        padding-top: 70px;
+    }
+}
+
+/* Desktop specific fixes */
+@media screen and (min-width: 769px) {
+    .game-card img {
+        width: auto;
+        height: 200px;
+        object-fit: contain;
+    }
+
+    .games-grid {
+        overflow: visible;
+    }
+}
+
+/* Global scroll fixes */
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+/* Ensure modals don't cause horizontal scroll */
+.modal {
+    overflow-x: hidden;
+}
+
+.modal-content {
+    max-width: min(500px, 90%);
+    margin: auto;
+}
+
+/* Ensure content containers don't cause scroll */
+.container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    box-sizing: border-box;
+}
+
+/* Library Page Specific Styles */
+.library-container {
+    padding-top: 100px;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.library-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+}
+
+.library-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(45deg, #ffffff, #e6e6e6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.library-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    padding: 1rem 0;
+}
+
+/* Library Page Specific Styles - Updated */
+.library-card {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    align-items: center;
+    gap: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.library-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.library-card img {
+    width: 150px;  /* Reduced from 200px */
+    height: 150px; /* Reduced from 200px */
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.game-info {
+    text-align: left;
+}
+
+.game-info h3 {
+    font-size: 1.4rem; /* Reduced from 1.6rem */
+    margin-bottom: 0.5rem; /* Reduced from 1rem */
+    color: white;
+}
+
+.game-info p {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.4; /* Reduced from 1.6 */
+    margin-bottom: 0.5rem; /* Reduced from 1rem */
+}
+
+.library-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* Reduced from 1rem */
+    min-width: 150px;
+}
+
+.library-actions .download-btn,
+.library-actions .delete-btn {
+    width: 100%;
+    padding: 0.5rem; /* Reduced from 0.8rem */
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.delete-btn {
+    background: linear-gradient(45deg, #ff6b6b, #ee5253);
+    color: white;
+    font-size: 15px;
+    font-family: smesh;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+    background: linear-gradient(45deg, #ee5253, #ff6b6b);
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(238, 82, 83, 0.4);
+}
+
+/* Mobile adjustments for library */
+@media screen and (max-width: 768px) {
+    .library-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 1rem;
+        padding: 0.8rem; /* Reduced from 1rem */
+    }
+
+    .library-card img {
+        width: 100%;
+        max-width: 120px; /* Reduced from 180px */
+        height: auto;
+        margin: 0 auto;
+    }
+
+    .game-info {
+        text-align: center;
+    }
+
+    .game-info h3 {
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .library-actions {
+        width: 100%;
+    }
+}
+
+/* Mobile Specific Adjustments */
+@media screen and (max-width: 768px) {
+    .library-container {
+        padding-top: 80px;
+    }
+
+    .library-header h1 {
+        font-size: 2rem;
+    }
+
+    .library-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 1rem;
+    }
+
+    .library-card {
+        max-width: 350px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    .library-card img {
+        max-width: 180px;
+        margin-bottom: 0.8rem;
+    }
+
+    .library-card h3 {
+        font-size: 1.2rem;
+    }
+
+    .library-actions {
+        gap: 0.6rem;
+    }
+
+    .library-actions .download-btn,
+    .library-actions .leaderboard-btn {
+        padding: 0.8rem;
+        font-size: 0.95rem;
+    }
+}
+
+/* Empty Library State */
+.empty-library {
+    text-align: center;
+    padding: 3rem 1rem;
+    margin-top: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.empty-library h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: white;
+    background: linear-gradient(45deg, #ffffff, #e6e6e6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.empty-library p {
+    margin-bottom: 1.5rem;
+}
+
+.empty-library .auth-btn {
+    max-width: 200px;
+    margin: 0 auto;
+}
+
+/* Navigation Link Fixes */
+@media screen and (max-width: 768px) {
+    nav {
+        grid-template-columns: auto 1fr auto;
+        padding: 0.8rem 1rem;
+    }
+
+    .nav-links {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.95);
+        padding: 0.5rem;
+        flex-direction: column;
+        transform: translateY(-150%);
+        transition: transform 0.3s ease;
+        z-index: 98;
+        backdrop-filter: blur(10px);
+    }
+
+    .nav-links.active {
+        transform: translateY(0);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-links a {
+        width: 100%;
+        text-align: center;
+        padding: 1rem;
+        margin: 0.2rem 0;
+        font-size: 1.1rem;
+    }
+
+    .logo {
+        font-size: 1.5rem;
+    }
+
+    .nav-controls {
+        margin-left: auto;
+    }
+
+    /* Adjust nav button layout */
+    .nav-button {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: white;
+        margin-left: 0.5rem;
+    }
+}
+
+/* Desktop Navigation Fixes */
+@media screen and (min-width: 769px) {
+    .nav-links {
+        margin-left: auto;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .nav-links a {
+        padding: 0.5rem 1.5rem;
+    }
+}
+
+/* ...existing code... */
+
+/* Delete confirmation notification styles */
+.notification.confirm {
+    background: rgba(0, 0, 0, 0.95);
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.notification .confirm-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.notification .confirm-btn,
+.notification .cancel-btn {
+    padding: 5px 15px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.notification .confirm-btn {
+    background: #ff4444;
+    color: white;
+}
+
+.notification .cancel-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.notification .confirm-btn:hover {
+    background: #cc0000;
+    transform: translateY(-2px);
+}
+
+.notification .cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* ...existing code... */
