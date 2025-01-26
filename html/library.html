@@ -341,13 +341,20 @@
 
                 libraryContainer.innerHTML = '';
                 Object.entries(library).forEach(([gameName, gameData]) => {
+                    // Add game versions mapping
+                    const gameVersions = {
+                        'Wood Man': 'Version 1.0.0',
+                        'Space Shooter': 'Version 1.0.0',
+                        'Dust Racing': 'Version 1.0.7'
+                    };
+
                     const gameCard = document.createElement('div');
                     gameCard.className = 'library-card';
                     gameCard.innerHTML = `
                         <img src="/img/${gameName.toLowerCase().replace(' ', '')}.png" alt="${gameName}">
                         <div class="game-info">
                             <h3 class="smesh">${gameName}</h3>
-                            <span class="version">Version 1.0.0</span>
+                            <span class="version">${gameVersions[gameName] || 'Version 1.0.0'}</span>
                             <p class="purchased-date">
                                 <i class="fas fa-clock"></i>
                                 Purchased: ${new Date(gameData.purchasedAt).toLocaleDateString()}
