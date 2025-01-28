@@ -48,18 +48,22 @@
                 <span>&times;</span>
             </button>
             <h2>Contact Us</h2>
-            <form id="contactForm" class="contact-form">
+            <form id="contactForm" class="contact-form" action="https://api.web3forms.com/submit" method="POST">
+                <!-- Add your Web3Forms access key -->
+                <input type="hidden" name="access_key" value="3ce46a45-6fb8-401a-a5ca-49d75aba01eb">
+                <input type="hidden" name="subject" value="New Contact Form Submission - Costuv">
+                
                 <div class="form-group">
-                    <input type="text" id="contactName" required placeholder="Your Name">
+                    <input type="text" id="contactName" name="name" required placeholder="Your Name">
                 </div>
                 <div class="form-group">
-                    <input type="email" id="contactEmail" required placeholder="Your Email">
+                    <input type="email" id="contactEmail" name="email" required placeholder="Your Email">
                 </div>
                 <div class="form-group">
-                    <textarea id="contactMessage" required placeholder="Your Message" rows="4"></textarea>
+                    <textarea id="contactMessage" name="message" required placeholder="Your Message" rows="4"></textarea>
                 </div>
                 <div class="contact-options">
-                    <button type="submit" class="auth-btn">Send Message</button>
+                    <button type="submit" class="auth-btn" id="submitBtn">Send Message</button>
                     <div class="alternative-contact">
                         <p>Or contact us directly:</p>
                         <a href="mailto:support@costuv.tech" class="contact-link">
@@ -173,18 +177,33 @@
         // Handle contact form submission
         document.getElementById('contactForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('contactName').value;
-            const email = document.getElementById('contactEmail').value;
-            const message = document.getElementById('contactMessage').value;
+            const form = e.target;
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Sending...';
 
-            // You can implement your preferred contact method here
-            // For now, we'll open the default email client as fallback
-            const mailtoLink = `mailto:support@costuv.tech?subject=Contact from ${name}&body=${message}%0D%0A%0D%0AFrom: ${email}`;
-            window.location.href = mailtoLink;
-            
-            // Clear form and close modal
-            e.target.reset();
-            closeContactModal();
+            try {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification('Message sent successfully!', 'success');
+                    form.reset();
+                    closeContactModal();
+                } else {
+                    throw new Error('Failed to send message');
+                }
+            } catch (error) {
+                showNotification('Failed to send message. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Send Message';
+            }
         });
     </script>
 </body>
